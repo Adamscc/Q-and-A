@@ -47,3 +47,8 @@ neo4j.bat console
 conda activate QandA
 python QandA.py
 ```
+
+## TO DO :
+### 1.编写前端网页，部署到服务器上
+### 2.部署到手机等边缘设备上
+### 3.微调自己的模型
