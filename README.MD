@@ -48,6 +48,12 @@ conda activate QandA
 python QandA.py
 ```
 
+## 7. Debug
+```bash
+python QandA.py
+```
+### 在输入问题的后面加上一个 "*debug" ，会自动打印出中间过程，方便Debug
+
 ## TO DO :
 ### 1. 编写前端网页，部署到服务器上
 ### 2. 部署到手机等边缘设备上
