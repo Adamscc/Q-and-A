@@ -1,0 +1,12 @@
+transformers
+peft
+requests
+lxml
+beautifulsoup4
+urllib3
+py2neo
+wikipedia
+tqdm
+opencc-python-reimplemented
+firecrawl-py
+numpy==1.26.4
