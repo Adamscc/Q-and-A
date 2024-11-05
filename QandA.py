@@ -84,12 +84,6 @@ class TextProcessor:
             # 找到第一个300字符以内的段落
             split_index = max_length
 
-            # 如果当前字符不是空格，尝试找到上一个逗号，以避免将单词拆分
-            # if text[max_length] != '，':
-            #     split_index = text.rfind('，', 0, max_length)
-            #     if split_index == -1:  # 如果没找到逗号，就强行分段
-            #         split_index = max_length
-
             split_index = max_length
 
             # 确保分割点不会超出文本长度
@@ -239,16 +233,9 @@ class KnowledgeGraph:
             results = self.db.run(query, node_id=node.identity).data()
 
             # 遍历输出所有相邻的节点和关系
-            # for result in results:
             for result in tqdm(results, desc="Fetching Nodes and Relations"):
-                # related_node = result['m']
                 relationship = result['r']
-                # print(f"Related Node: {related_node}")
-                # print(f"Relationship: {relationship}")
-                # print(type(relationship))
-                # print(str(relationship))
                 rel += str(relationship) + "\n"
-            # print("rel: =============================================================================\n"+ rel)
             time.sleep(0.1)
             print("Nodes and Relations Fetched")
             return rel
@@ -278,7 +265,6 @@ class KnowledgeGraph:
                 print(f"core: {core}, sub: {en}")
             prompt = TextProcessor.extract_surrounding_text(knowledge, en_n,
                                                             150) + f"\n根据以上信息，说明二者的关系，不需要任何其他话语和提示，请只将关系总结成一个词语,并在两边用'[]'括起来,如果二者表达同一个意思他们关系就是相同， {core_n}和{en_n} 的关系是：\n"
-            # res = self.agent.mode_extended(prompt)
             res = self.agent.mode_chat(prompt)
             if kg_debug:
                 print("original response: " + res)
@@ -334,24 +320,10 @@ class KnowledgeGraph:
                 text = WikipediaHandler.wiki(core[0]["entity"])[:1000]
                 if kg_debug:
                     print("wiki_text: " + text)
-                # pieces = TextProcessor.split_text(text, 200)
-                #
-                # for piece in pieces:
-                #     ex_piece = self.agent.extract_entities(piece)
-                #     if kg_debug:
-                #         print("piece: " + piece)
-                #         print("ex_piece: " + ex_piece)
-                #     outs = outs + TextProcessor.format_entity(ex_piece)
-                #
-                # # outs = self.agent.extract_entities(text)
                 outs = self.ner.named_entity_reco(text, kg_debug)
                 if kg_debug:
                     print("outs: ", outs)
-                # result = TextProcessor.format_entity(outs)
-                # result = list(set(outs))
                 result = outs
-                # print("Extracted Entities: ")
-                # print(result)
                 time.sleep(0.1)
                 self.create_nodes(result, kg_debug)
                 time.sleep(0.1)
@@ -467,10 +439,7 @@ class NER:
                     entity_name = "".join(entity)
                     tmp = {"entity": TextProcessor.convert_to_simplified(entity_name), "label": label}
                     entities.append(tmp)
-                # print(f"Entity: {entity_name}, Label: {label}")
-            # print(entities)
 
-            # print(entities)
             en = en + entities
         field = 'entity'
         # 用于存储不重复的字典
@@ -535,7 +504,6 @@ json
         input_text = prompt + inputs
         input_ids = self.tokenizer(input_text, return_tensors="pt").to("cuda")
         outputs = self.model.generate(**input_ids, max_new_tokens=1000)
-        # print(tokenizer.decode(outputs[0]))
         result = self.tokenizer.decode(outputs[0])
         return result
 
@@ -557,7 +525,6 @@ json
         if matches:
             # 取出最后一个匹配项
             last_match = matches[-1]
-            # print(last_match)
         else:
             last_match = None
             print("未找到双引号括起来的内容")
@@ -678,31 +645,16 @@ class WebSearcher:
                     article_text = self.Baidubaike(item, debug)
 
                 else:
-                    # first_paragraph = soup.find('p').get_text() if soup.find('p') else 'No paragraph found'
-                    #
-                    # print(f"Title: {title}")
-                    # print(f"First paragraph: {first_paragraph}")
-                    # 提取网页中的主要正文
-                    # 注意：下面的选择器是示例，实际选择器取决于网页的具体结构
-                    # 提取网页中的主要正文
-                    # article_body = soup.find('div', class_='article-body')  # 根据实际情况修改选择器
-                    # paragraphs = soup.find_all('div', class_='jlemmacontent', attrs={'data-tag': 'paragraph'})
-                    # if not article_body:
-                    #     article_body = soup.find('main')  # 尝试查找其他可能的选择器
-                    # if not article_body:
-                    #     article_body = soup.find('div', class_='content')  # 尝试查找其他可能的选择器
                     article_body = self.firecrawl.get_text_from_url(url)
 
                     # 如果找到正文内容，则提取其文本
                     if article_body:
-                        # article_text = article_body.get_text(separator='\n').strip()
                         article_text = re.sub(r'\s+', ' ', article_body).strip()
                     else:
                         article_text = ''
 
                     # 清理多余的换行和空白
                     # 替换多个换行符为一个空格，然后去除首尾的换行符
-                    # article_text = re.sub(r'\n+', '\n', article_text).strip()
                     article_text = re.sub(r'\n+', ' ', article_text).strip()
                     # 打印结果
 
@@ -765,16 +717,6 @@ class ChatBot:
                     print(f"出现错误：{e}")
                     continue
             elif choice == "2":
-                # try:
-                #     tmp = input("现在是知识图谱问答，请输入问题：").split("*", 1)
-                #     if len(tmp) > 1 and tmp[1] == "debug":
-                #         self.kg_debug = True
-                #     if self.kg_debug:
-                #         print("query: " + tmp[0])
-                #     self.knowledge_graph.kg_q_and_a(tmp[0],self.kg_debug)
-                # except Exception as e:
-                #     print(f"出现错误：{e}")
-                #     continue
                 tmp = input("现在是知识图谱问答，请输入问题：").split("*", 1)
                 if len(tmp) > 1 and tmp[1] == "debug":
                     self.kg_debug = True
@@ -793,9 +735,9 @@ if __name__ == "__main__":
     warnings.simplefilter('ignore', InsecureRequestWarning)
     agent = Agent("model/gemma-2-2b-it", "model/Gemma_lora_model")
     ner = NER("model/bert-base-chinese-ner")
-    knowledge_graph = KnowledgeGraph(ner, agent, 'bolt://localhost:7687', auth=("neo4j", "chenshuang"))
+    knowledge_graph = KnowledgeGraph(ner, agent, 'bolt://localhost:7687', auth=("name", "password"))
     summarizer = Summarizer("model/t5_summary")
-    firecrawl = Firecrawl(api_key='fc-33eed10e07b348229d55445bb7dc83ee')
-    web_searcher = WebSearcher(summarizer, firecrawl, bing_api_key='77588055723345dab0ec1c222f499646')
+    firecrawl = Firecrawl(api_key='API_KEY')
+    web_searcher = WebSearcher(summarizer, firecrawl, bing_api_key='API_KEY')
     chatbot = ChatBot(agent, knowledge_graph, summarizer, web_searcher)
     chatbot.run()
